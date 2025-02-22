@@ -1,0 +1,120 @@
+<!-- templates/student_dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Dashboard - Bonus Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <style>
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background-color: #f4f7f6;
+    }
+    .header {
+      margin-top: 30px;
+      margin-bottom: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h2 {
+      font-weight: 600;
+      color: #333;
+    }
+    .btn-logout {
+      background-color: #5563DE;
+      color: #fff;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+    .btn-logout:hover {
+      background-color: #414ab1;
+    }
+    .card {
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      border: none;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    .card-header {
+      background-color: #5563DE;
+      color: #fff;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h2>Welcome, {{ user.name }}</h2>
+    <a href="{{ url_for('logout') }}" class="btn btn-logout">Logout</a>
+  </div>
+  
+  <!-- Transactions Card -->
+  <div class="card mb-3">
+    <div class="card-header">
+      Your Transactions
+    </div>
+    <div class="card-body">
+      {% if transactions %}
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Amount</th>
+            <th>Description</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for trans in transactions %}
+          <tr>
+            <td>{{ trans.type }}</td>
+            <td>${{ trans.amount }}</td>
+            <td>{{ trans.description }}</td>
+            <td>
+              {% if trans.timestamp %}
+                {{ trans.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="text-muted">No transactions yet.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Notifications Card -->
+  <div class="card">
+    <div class="card-header">
+      Notifications
+    </div>
+    <div class="card-body">
+      {% if notifications %}
+      <ul class="list-group">
+        {% for notif in notifications %}
+        <li class="list-group-item">
+          {{ notif.message }} <br>
+          {% if notif.timestamp %}
+          <small>{{ notif.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</small>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="text-muted">No notifications yet.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+</body>
+</html>
