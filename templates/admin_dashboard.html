@@ -7,61 +7,25 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
   <style>
-    body {
-      font-family: 'Montserrat', sans-serif;
-      background-color: #f4f7f6;
-    }
-    .header {
-      margin-top: 30px;
-      margin-bottom: 30px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .header h2 {
-      font-weight: 600;
-      color: #333;
-    }
-    .btn-logout {
-      background-color: #5563DE;
-      color: #fff;
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 5px;
-      transition: background-color 0.3s;
-    }
-    .btn-logout:hover {
-      background-color: #414ab1;
-    }
-    .transaction-form {
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      margin-bottom: 40px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-    .card-student {
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      border: none;
-      border-radius: 10px;
-      margin-bottom: 20px;
-    }
-    .card-student .card-header {
-      background-color: #5563DE;
-      color: #fff;
-      border-top-left-radius: 10px;
-      border-top-right-radius: 10px;
-    }
-    .card-student .card-body {
-      background: #fff;
-    }
+    body { font-family: 'Montserrat', sans-serif; background-color: #f4f7f6; }
+    .header { margin-top: 30px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
+    .header h2 { font-weight: 600; color: #333; }
+    .btn-logout { background-color: #5563DE; color: #fff; border: none; padding: 0.5rem 1rem; border-radius: 5px; transition: background-color 0.3s; }
+    .btn-logout:hover { background-color: #414ab1; }
+    .bonus-info { font-size: 1.2rem; color: #333; }
+    .transaction-form { background: #fff; padding: 20px; border-radius: 10px; margin-bottom: 40px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    .card-student { box-shadow: 0 2px 6px rgba(0,0,0,0.1); border: none; border-radius: 10px; margin-bottom: 20px; }
+    .card-student .card-header { background-color: #5563DE; color: #fff; border-top-left-radius: 10px; border-top-right-radius: 10px; }
   </style>
 </head>
 <body>
 <div class="container">
   <div class="header">
     <h2>Welcome, {{ user.name }}</h2>
-    <a href="{{ url_for('logout') }}" class="btn btn-logout">Logout</a>
+    <div>
+      <span class="badge badge-primary p-2">Bonus Money Left: ${{ bonus_left }}</span>
+      <a href="{{ url_for('logout') }}" class="btn btn-logout ml-3">Logout</a>
+    </div>
   </div>
   
   <!-- Transaction Form -->
@@ -131,4 +95,3 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
 </body>
 </html>
-

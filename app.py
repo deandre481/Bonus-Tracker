@@ -43,7 +43,7 @@ def signup():
         name = request.form['name']
         email = request.form['email']
         password = request.form['password']
-        role = request.form['role']  # Should be 'admin' or 'student'
+        role = request.form['role']  # 'admin' or 'student'
         assigned_admin = request.form.get('assigned_admin') if role == 'student' else None
 
         # Check if user already exists
@@ -53,17 +53,26 @@ def signup():
             flash("User already exists.", "danger")
             return redirect(url_for('signup'))
 
-        # Create the new user (note: storing plain-text passwords is insecure for production)
-        user_data = {
-            'name': name,
-            'email': email,
-            'password': password,
-            'role': role,
-            'assigned_admin': assigned_admin
-        }
+        # Create new user. For admins, initialize bonus_left to 1000.
+        if role == 'admin':
+            user_data = {
+                'name': name,
+                'email': email,
+                'password': password,
+                'role': role,
+                'bonus_left': 1000
+            }
+        else:
+            user_data = {
+                'name': name,
+                'email': email,
+                'password': password,
+                'role': role,
+                'assigned_admin': assigned_admin
+            }
         db.collection('users').add(user_data)
         flash("Sign up successful. Please log in.", "success")
-        return redirect(url_for('login'))
+        return redirect(url_for('index'))
     else:
         admins = get_admins()
         return render_template('signup.html', admins=admins)
@@ -91,7 +100,7 @@ def login():
             return redirect(url_for('dashboard'))
         else:
             flash("Invalid credentials.", "danger")
-            return redirect(url_for('login'))
+            return redirect(url_for('index'))
     return render_template('login.html')
 
 # -------------------------------------------------------------------
@@ -103,7 +112,12 @@ def dashboard():
         return redirect(url_for('login'))
     user = session['user']
     if user['role'] == 'admin':
-        # Fetch all students assigned to this admin
+        # Fetch updated admin record
+        admin_doc = db.collection('users').document(user['id']).get()
+        admin_data = admin_doc.to_dict()
+        bonus_left = admin_data.get('bonus_left', 1000)
+        
+        # Get all students assigned to this admin
         students = []
         users_ref = db.collection('users')
         query = users_ref.where('role', '==', 'student').where('assigned_admin', '==', user['id']).stream()
@@ -120,9 +134,9 @@ def dashboard():
                 transactions.append(t.to_dict())
             student['transactions'] = transactions
             students.append(student)
-        return render_template('admin_dashboard.html', user=user, students=students)
+        return render_template('admin_dashboard.html', user=user, students=students, bonus_left=bonus_left)
     elif user['role'] == 'student':
-        # Student dashboard logic remains unchanged
+        # Student dashboard logic remains unchanged.
         transactions = []
         trans_ref = db.collection('transactions')
         query = trans_ref.where('student_id', '==', user['id']).stream()
@@ -151,6 +165,19 @@ def add_transaction():
     trans_type = request.form['trans_type']  # 'bonus' or 'deduction'
     amount = float(request.form['amount'])
     description = request.form['description']
+
+    # For bonus transactions, subtract from admin's bonus_left.
+    if trans_type == 'bonus':
+        admin_doc_ref = db.collection('users').document(session['user']['id'])
+        admin_data = admin_doc_ref.get().to_dict()
+        current_bonus = admin_data.get('bonus_left', 1000)
+        if current_bonus < amount:
+            flash("Not enough bonus funds left.", "danger")
+            return redirect(url_for('dashboard'))
+        new_bonus = current_bonus - amount
+        admin_doc_ref.update({'bonus_left': new_bonus})
+
+    # Create the transaction record
     transaction_data = {
         'student_id': student_id,
         'admin_id': session['user']['id'],
@@ -160,6 +187,7 @@ def add_transaction():
         'timestamp': datetime.datetime.utcnow()
     }
     db.collection('transactions').add(transaction_data)
+
     # Create a notification for the student
     notif_data = {
         'student_id': student_id,
